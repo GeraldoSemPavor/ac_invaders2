@@ -11,6 +11,7 @@ import org.academiadecodigo.simplegraphics.keyboard.KeyboardEvent;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardEventType;
 import org.academiadecodigo.simplegraphics.keyboard.KeyboardHandler;
 import org.academiadecodigo.simplegraphics.pictures.Picture;
+
 import java.util.ArrayList;
 import java.util.ConcurrentModificationException;
 
@@ -52,6 +53,12 @@ public class Game implements KeyboardHandler {
     private Player player;
     private Keyboard keyboard;
 
+    /**
+     * Number of killed hipsters needed to win the game and WIN / LOSS screens
+     */
+    private int winKillCount = 15;
+    Picture loseScreen;
+    Picture background;
 
     /**
      * Constructor
@@ -91,17 +98,17 @@ public class Game implements KeyboardHandler {
         downPressed.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
         keyboard.addEventListener(downPressed);
 
-        /** LEFT */
-        KeyboardEvent leftPressed = new KeyboardEvent();
+        /** LEFT - NOT IN USE */
+        /*KeyboardEvent leftPressed = new KeyboardEvent();
         leftPressed.setKey(KeyboardEvent.KEY_LEFT);
         leftPressed.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
-        keyboard.addEventListener(leftPressed);
+        keyboard.addEventListener(leftPressed);*/
 
-        /** RIGHT */
-        KeyboardEvent rightPressed = new KeyboardEvent();
+        /** RIGHT - NOT IN USE */
+        /*KeyboardEvent rightPressed = new KeyboardEvent();
         rightPressed.setKey(KeyboardEvent.KEY_RIGHT);
         rightPressed.setKeyboardEventType(KeyboardEventType.KEY_PRESSED);
-        keyboard.addEventListener(rightPressed);
+        keyboard.addEventListener(rightPressed);*/
 
         /** SHOOT */
         KeyboardEvent shoot = new KeyboardEvent();
@@ -127,10 +134,12 @@ public class Game implements KeyboardHandler {
      * Asks the Factory to make enemies.
      * Instantiates the player
      */
-    public void init() {
+    public void init() throws InterruptedException {
 
-        Picture background = new Picture(0, 0, "wall1920x1080.png");
+        background = new Picture(0, 0, "load-screen.png");
         background.draw();
+        Thread.sleep(10000);
+        background.load("wall1920x1080.png");
 
         for (int y = 0; y < rows; y++) {
             for (int x = 0; x < columns; x++) {
@@ -142,7 +151,7 @@ public class Game implements KeyboardHandler {
             hipsters.add(HipsterFactory.makeHipster(i));
         }
 
-        player = new Player(0, 16);
+        player = new Player(11, 23);
 
         /** See getMap() near the end */
         getMap();
@@ -156,16 +165,16 @@ public class Game implements KeyboardHandler {
      */
     public void start() throws InterruptedException {
 
-        while (true) {
+        while (winOrLose()) {
 
             if (!actionStack.isEmpty()) {
                 actionStack.remove(0);
                 shoot();
             }
             moveBullets(shurikens, hipsters);
-            collisionDetector.checkCollisions(hipsters, shurikens);
+            collisionDetector.checkCollisions(hipsters, shurikens, player);
             moveHipsters(hipsters, shurikens);
-            collisionDetector.checkCollisions(hipsters, shurikens);
+            collisionDetector.checkCollisions(hipsters, shurikens, player);
             Thread.sleep(60);
             if (hipsters.size() == 0) {
                 for (int i = 0; i < 14; i++) {
@@ -173,6 +182,36 @@ public class Game implements KeyboardHandler {
                 }
             }
         }
+        /** Erases all Game Objects */
+        for (Hipster hipster : hipsters) {
+            hipster.killHipster();
+        }
+        for (Shuriken shuriken : shurikens) {
+            shuriken.killShuriken();
+        }
+        player.killPlayer();
+
+        /** Choose win or lose background */
+        String screen = "";
+        if (player.getCollisionCounter() == 4) {
+            screen = "lose-screen.png";
+        }
+        if (collisionDetector.getKillCount() == winKillCount) {
+            screen = "win-screen.png";
+        }
+        background.load(screen);
+
+    }
+
+    /** Returns a boolean to the while() in the start() method to verify win or lose condition */
+    public boolean winOrLose() {
+        if (player.getCollisionCounter() == 4) {
+            return false;
+        }
+        if (collisionDetector.getKillCount() == winKillCount) {
+            return false;
+        }
+        return true;
     }
 
     /**
@@ -231,13 +270,18 @@ public class Game implements KeyboardHandler {
      * Shoot method. Adds a shuriken to the ArrayList<Shuriken>.
      */
     private void shoot() {
+
+        /** Limits amount of shurikens in flight */
+        if (shurikens.size() == 7){
+            return;
+        }
         shurikens.add(new Shuriken(player.getCol() + 1, player.getRow()));
     }
 
     /**
      * Method for debugging and getting the cells
      */
-    public void getMap() {
+    private void getMap() {
         int counter = 0;
         for (Cell[] row : cells) {
             for (Cell cell : row) {

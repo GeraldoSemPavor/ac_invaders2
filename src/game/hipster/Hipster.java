@@ -96,6 +96,16 @@ public class Hipster {
     public void killHipster() {
         this.col = -1;
         this.row = -1;
+        if (Math.random() * 30 == 15){
+        hipsterImage.load("pow-gabriel.png");
+        }
+        hipsterImage.load("pow.png");
+        try {
+            Thread.sleep(90);
+        }catch (InterruptedException ie){
+            ie.getStackTrace();
+            System.out.println("POW");
+        }
         hipsterImage.delete();
     }
 

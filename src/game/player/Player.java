@@ -15,10 +15,11 @@ public class Player {
      */
 
     /**
-     * Coordinates and Graphic Representation
+     * Coordinates, collision counter and Graphic Representation
      */
     private int col;
     private int row;
+    private int collisionCounter;
     private Picture playerImage;
 
     /**
@@ -27,10 +28,11 @@ public class Player {
 
     public Player(int col, int row) {
 
-        /** Coordinates and instantiating graphic representation */
+        /** Coordinates, collision counter and instantiating graphic representation */
         this.col = col;
         this.row = row;
-        playerImage = new Picture(0, 16 * Cell.CELLSIZE, "Ninja1medium.png");
+        collisionCounter = 0;
+        playerImage = new Picture(col * Cell.CELLSIZE, row * Cell.CELLSIZE, "ninja-s1.png");
         playerImage.draw();
     }
 
@@ -95,6 +97,38 @@ public class Player {
         playerImage.draw();
     }
 
+    /** Collision and Change clothes method */
+    public void addCollision(){
+        if (collisionCounter == 4){
+            return;
+        }
+        this.collisionCounter++;
+    }
+
+    public void changeClothes(){
+
+        switch (collisionCounter) {
+            case 1:
+                playerImage.load("ninja-s2.png");
+                break;
+            case 2:
+                playerImage.load("ninja-s3.png");
+                break;
+            case 3:
+                playerImage.load("ninja-s4.png");
+                break;
+            case 4:
+                playerImage.load("ninja-final.png");
+            default:
+                System.out.println("Change clothes error");
+                break;
+        }
+    }
+
+    public void killPlayer(){
+        this.playerImage.load("gg.png");
+    }
+
     /**
      * Getters
      */
@@ -105,5 +139,9 @@ public class Player {
 
     public int getRow() {
         return row;
+    }
+
+    public int getCollisionCounter(){
+        return this.collisionCounter;
     }
 }

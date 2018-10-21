@@ -1,11 +1,11 @@
 <?xml version="1.0" ?>
-<project name="Battleship" default="jarfile">
+<project name="<AC_> INVADERS" default="jarfile">
 
     <!-- Initialize build properties  -->
     <target name="init" description="Initializes properties">
-        <property name="project.name" value="battleship-project"/>
+        <property name="project.name" value="mainstream-invasion"/>
         <property name="src.dir" value="src"/>
-        <property name="main.class" value="org.academiadecodigo.battleship.Main"/>
+        <property name="main.class" value="Main"/>
         <property name="build.dir" value="build"/>
         <property name="classes.dir" value="${build.dir}/classes"/>
         <property name="lib.dir" value="lib"/>
